@@ -14,10 +14,11 @@ struct recipe {
     int s_shelf_life;
     int s_date_of_purchase;
     int s_month_of_purchase;
+    int s_year_of_purchase;
 };
 
 void print(recipe* f, int count);
-int find_normal_ingredient(recipe* f, int day, int month, int count, bool bad_cost);
+int find_normal_ingredient(recipe* f, int day, int month, int year, int count, bool bad_cost);
 void print_menu();
 int load(const char* file, recipe* a);
 void enough(recipe* f, int count);
@@ -34,6 +35,7 @@ int main()
     char flower[50] = {};
     int day;
     int month;
+    int year;
     while (true)
     {
         print_menu();
@@ -65,7 +67,11 @@ int main()
             for (; month > 12;) {
                 cin >> month;
             }
-            cout << find_normal_ingredient(f, day, month, count, 1);
+            cin >> year;
+            for (; year > 2026 || year < 2020;) {
+                cin >> year;
+            }
+            cout << find_normal_ingredient(f, day, month, year, count, 1);
             break;
         case '5':
             cout << "Enter date: ";
@@ -77,7 +83,12 @@ int main()
             for (; month > 12;) {
                 cin >> month;
             }
-            cout << find_normal_ingredient(f, day, month, count, 0);
+            cin >> year;
+            for (; year > 2026|| year < 2020;) {
+                cin >> year;
+            }
+
+            cout << find_normal_ingredient(f, day, month, year, count, 0);
             break;
         case '6':
             enough(f, count);
@@ -103,16 +114,16 @@ void print(recipe* f, int count)
         cout << "on storage " << f[i].s_quantiti_on_storage << endl;
         cout << "cost " << f[i].s_cost << endl;
         cout << "shelf life  " << f[i].s_shelf_life << endl;
-        cout << "date of purchase " << f[i].s_date_of_purchase << '.' << f[i].s_month_of_purchase << endl;
+        cout << "date of purchase " << f[i].s_date_of_purchase << '.' << f[i].s_month_of_purchase << f[i].s_year_of_purchase << endl;
         cout << endl;
     }
 }
-int find_normal_ingredient(recipe* f, int day, int month, int count, bool bad_cost) {
+int find_normal_ingredient(recipe* f, int day, int month, int year, int count, bool bad_cost) {
     int quantity_normal = 0;
     int bad_cost_sum = 0;
     int end = 0;
     for (int i = 0; i < count; i++) {
-        if (f[i].s_date_of_purchase + (30 * f[i].s_month_of_purchase) + f[i].s_shelf_life <= day + 30 * month) {
+        if (f[i].s_date_of_purchase + (30 * f[i].s_month_of_purchase) + (365 * f[i].s_year_of_purchase) + f[i].s_shelf_life <= day + 30 * month+year*365) {
             bad_cost_sum += f[i].s_cost * f[i].s_quantiti_on_storage;
         }
         else end += (quantity_normal++)*f[i].s_quantiti_on_storage;
@@ -180,6 +191,10 @@ int load(const char* file, recipe* a)
         char month_of_purchase[49] = {};
         f.getline(month_of_purchase, 49);
         a[i].s_month_of_purchase = atoi(month_of_purchase);
+
+        char year_of_purchase[49] = {};
+        f.getline(year_of_purchase, 49);
+        a[i].s_month_of_purchase = atoi(year_of_purchase);
     }
     f.close();
     return count;
@@ -243,9 +258,15 @@ void setData(const char* fileName, int size) {
 
             std::cout << "Enter month: " << std::endl;
             std::cin >> dataBase[i].s_month_of_purchase;
-            for (; dataBase[i].s_month_of_purchase < 0 || dataBase[i].s_month_of_purchase> 30;) {
+            for (; dataBase[i].s_month_of_purchase < 0 || dataBase[i].s_month_of_purchase> 12;) {
                 std::cout << "Enter month: " << std::endl;
                 std::cin >> dataBase[i].s_month_of_purchase;
+            }
+            std::cout << "Enter year: " << std::endl;
+            std::cin >> dataBase[i].s_year_of_purchase;
+            for (; dataBase[i].s_year_of_purchase < 2000 || dataBase[i].s_month_of_purchase> 2025;) {
+                std::cout << "Enter year: " << std::endl;
+                std::cin >> dataBase[i].s_year_of_purchase;
             }
 
             file << dataBase[i].s_ingredient << std::endl
@@ -254,7 +275,8 @@ void setData(const char* fileName, int size) {
                 << dataBase[i].s_cost << std::endl
                 << dataBase[i].s_shelf_life << std::endl
                 << dataBase[i].s_date_of_purchase << std::endl
-                << dataBase[i].s_month_of_purchase << std::endl;
+                << dataBase[i].s_month_of_purchase << std::endl
+                << dataBase[i].s_year_of_purchase << std::endl;
         }
         file.close();
     }
